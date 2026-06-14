@@ -9,6 +9,8 @@ FPS = 60
 
 WIDTH = 864
 HEIGHT = 936
+CENTRE_X = 432
+CENTRE_Y = 468
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Bird")
@@ -96,4 +98,68 @@ class Pipe(pygame.sprite.Sprite):
         self.rect.x -= scroll_speed
         if self.rect.right < 0:
             self.kill()
+        
+class Button:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def draw(self):
+        action = False
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                action = True
+
+
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
+        return action
+    
+bird_group = pygame.sprite.Group()
+pipe_group = pygame.sprite.Group()
+
+flappy = Bird(100, CENTRE_Y)
+bird_group.add(flappy)
+
+restart_button = Button(CENTRE_X - 50, CENTRE_Y - 100, button)
+
+run = True
+while run:
+    clock.tick(FPS)
+    screen.blit(bg, (0, 0))
+    pipe_group.draw(screen)
+    bird_group.draw(screen)
+
+    bird_group.update()
+    # Draw the ground and make it move
+    screen.blit(ground, (ground_scroll, 768))
+
+    if len(pipe_group) > 0:
+        if (bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left) and (bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right) and pass_pipe == False:
+            pass_pipe = True
+        
+        if pass_pipe == True:
+            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
+                pass_pipe = False
+                score += 1
             
+    draw_text(str(score), font, "grey", CENTRE_X, 35)
+
+    # Check for collision
+    if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+        game_over = True
+        flying = False
+
+    if flappy.rect.bottom >= 768:
+        game_over = True
+        flying = False
+
+    if game_over == False and game_over == True:
+        # Generate new pipes
+        time_now = pygame.time.get_ticks()
+        if time_now - last_pipe > pipe_frequency:
+            height = random.randint(-100, 100)
+            top_pipe = Pipe(WIDTH, ())
